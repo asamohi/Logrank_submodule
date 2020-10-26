@@ -35,16 +35,27 @@ struct Crypto_Resources
 
 std::__1::shared_ptr<seal::SEALContext> create_context(const int scale_cost_param)
 {
-    //I icreased the bit_sizes from (60, 40, 40, 60) to (60, 30, 30, 30, 60) to avoid wrap around
-    // on the encypted data. this way by the end of the calculation we have 60+30 bits and not 60 bits.
-    //the max  bits for poly_modulus_degree=8192 is 218. 60+30+30+30+60 = 210,  so we are still in the write range.
+    /* I increased the bit_sizes from (60, 40, 40, 60) to (60, 30, 30, 30, 60) to avoid wrap around bugs
+     * on the encrypted data. By the end of the calculation we have 60+30 bits instead of 60 bits.
+     * (60 bits caused an error, 60+30 bits solved the issue.)
+     * the CoeffModulus maximum bits for poly_modulus_degree=8192 is 218.
+     * 60+30+30+30+60 = 210 < 218, so we are still in the valid range. */
 
     EncryptionParameters parms(scheme_type::CKKS);
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 60, scale_cost_param, scale_cost_param, scale_cost_param, 60 }));
 
+    /*  We choose the initial scale to be 2^30. At level 1 (the lowest level we used), we still have 60+30-30=60
+     *  bits of precision before the decimal point, and enough (how much?) of precision after the decimal point.
+     *  (The -30 is because of the scale, 60+30 is because we still have 2 primes left in the CoeffModulus)
+     *  Since our intermediate primes are 30 bits (in fact, they are very close to 2^30), we can achieve
+     *  scale stabilization as described above.  */
+
     auto context = SEALContext::Create(parms);
+
+    /*  When parameters are used to create SEALContext, Microsoft SEAL will first validate those parameters.
+     *  The parameters chosen are valid. */
     print_parameters(context);
     cout << endl;
     cout << "Parameter validation (success): " << context->parameter_error_message() << endl;
@@ -54,7 +65,7 @@ std::__1::shared_ptr<seal::SEALContext> create_context(const int scale_cost_para
 
 std::__1::shared_ptr<seal::CKKSEncoder> create_encoder(std::__1::shared_ptr<seal::SEALContext> context)
 {
-    auto encoder = std::make_shared<CKKSEncoder>(context);
+    auto encoder = std::make_shared<CKKSEncoder>(context); // the encoder use poly_modulus_degree/2 slots => 4096
     cout << "Number of slots: " << encoder->slot_count() << endl;
 
     return encoder;
@@ -62,7 +73,8 @@ std::__1::shared_ptr<seal::CKKSEncoder> create_encoder(std::__1::shared_ptr<seal
 
 Inputs sample_imputs()
 {
-    //Init values:
+    //sample random values.
+
     Inputs inputs;
     inputs.O1 = rand() % 100;
     inputs.E1 = (double) (rand() % 100000)/1000; //2345.669;

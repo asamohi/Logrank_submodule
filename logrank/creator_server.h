@@ -9,6 +9,7 @@
 #include "client.h"
 #include "serv_func.h"
 
+/*  decrypted_result_q - represents an unsecure one-way channel between decryption sever and clients.  */
 extern std::queue<Decrypted_Result> decrypted_result_q;
 
 class creator_server
@@ -27,7 +28,12 @@ public:
     {
         context = context_;
         encoder = encoder_;
+
+        /*  Init the keys   */
         create_all_keys();
+
+        /*  Create a Decryptor object.
+         *  Decryptor object is used in the Online Phase of the protocol   */
         decryptor = new Decryptor(context, secret_key);
     }
 
@@ -35,6 +41,7 @@ public:
     {
         delete decryptor;
     }
+
     void create_all_keys()
     {
         KeyGenerator keygen(context);
@@ -55,32 +62,38 @@ public:
 
     void decrypt_msg(Encrypted_Result encryptedResult)
     {
-        /*
-        Decrypt, decode, and print the result.
-        */
+        /*  1. Decryption: */
         Plaintext D_plain;
         Plaintext U_plain;
 
         decryptor->decrypt(encryptedResult.D_encrypted, D_plain);
         decryptor->decrypt(encryptedResult.U_encrypted, U_plain);
+
+        /*  2. Decode: */
         vector <double> D_result, U_result;
         encoder->decode(D_plain, D_result);
         encoder->decode(U_plain, U_result);
 
+        /*  3. Print part of the decoded vectors, for sainety-check.
+         *     All values in a vector should be equal  */
         print_vector(D_result, 3, 7);
         print_vector(U_result, 3, 7);
-        double d, u;
-        d=D_result[0];
-        u=U_result[0];
 
-        //Clean queue and put the msg there:
+        /*  4. Copy one element, they are all the same... */
+        double d = D_result[0];
+        double u = U_result[0];
+
+        Decrypted_Result result;
+        result.D = d;
+        result.U = u;
+
+        /*  5. The creator server is responsible to empty the decrypted_result_q.
+         *      For simplicity, we empty the queue at the just before pushing a new msg.
+         *      After cleaning the queue, the server can use it to send the result to the clients */
         while(!decrypted_result_q.empty())
         {
             decrypted_result_q.pop();
         }
-        Decrypted_Result result;
-        result.D = d;
-        result.U = u;
 
         decrypted_result_q.push(result);
     }

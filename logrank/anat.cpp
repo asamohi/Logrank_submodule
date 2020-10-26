@@ -103,14 +103,14 @@ void Logrank_protocol(double O1, double E1, double V1, double r1,
     Compute D = T0 * R  and relinearize and rescale
     */
     Ciphertext D_encrypted;
-    calculate_multiply_relinearize_and_rescale(evaluator, sigma_T0_encrypted, sigma_r_encrypted,
+    multiply_relinearize_and_rescale(evaluator, sigma_T0_encrypted, sigma_r_encrypted,
                         D_encrypted, "D", relin_keys);
 
     /*
     Compute R * R  and relinearize and rescale
     */
     Ciphertext R_sq_encrypted;
-    calculate_square_relinearize_and_rescale(evaluator, sigma_r_encrypted,
+    square_relinearize_and_rescale(evaluator, sigma_r_encrypted,
                                              R_sq_encrypted, "R", relin_keys);
 
 
@@ -150,7 +150,7 @@ void Logrank_protocol(double O1, double E1, double V1, double r1,
     print_line(__LINE__);
     cout << "Compute and rescale U = T1*R*R." << endl;
     Ciphertext U_encrypted;
-    calculate_multiply_relinearize_and_rescale(evaluator, sigma_T1_encrypted, R_sq_encrypted,
+    multiply_relinearize_and_rescale(evaluator, sigma_T1_encrypted, R_sq_encrypted,
                                                U_encrypted, "U", relin_keys);
 
     /*
