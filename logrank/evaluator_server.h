@@ -9,10 +9,6 @@
 #include "../../examples.h"
 #include "serv_func.h"
 
-/*  enc_msg_q - represents a secure one-way channel between client and evaluation server.
- *  Must be secure in case the creator server is corrupted. Assume an HTTPS connection. */
-extern std::queue<Cipher_Msg> enc_msg_q;
-
 class evaluator_server
 {
 private:
@@ -21,13 +17,18 @@ private:
     Evaluator* evaluator;
     double scale;
 
+    /*  enc_msg_q - represents a secure one-way channel between client and evaluation server.
+     *  Must be secure in case the creator server is corrupted. Assume an HTTPS connection. */
+    std::queue<Cipher_Msg>* enc_msg_q;
 
 public:
-    evaluator_server(std::shared_ptr<SEALContext> context_, RelinKeys relin_keys_, double scale_)
+    evaluator_server(std::shared_ptr<SEALContext> context_, RelinKeys relin_keys_,
+                     std::queue<Cipher_Msg>* enc_msg_q_, double scale_)
     {
         relin_keys = relin_keys_;
         context = context_;
         scale = scale_;
+        enc_msg_q = enc_msg_q_;
 
         /*  Create a Evaluator object.
          *  Evaluator object is used in the Online Phase of the protocol   */
@@ -43,10 +44,10 @@ public:
         /*  Read all the cipher msgs from all clients.
          *  We assume that when this method is called all the clients already put their msgs in the queue  */
         vector<Cipher_Msg> msg_vec;
-        while(!enc_msg_q.empty())
+        while(!enc_msg_q->empty())
         {
-            msg_vec.push_back(enc_msg_q.front());
-            enc_msg_q.pop();
+            msg_vec.push_back(enc_msg_q->front());
+            enc_msg_q->pop();
         }
 
         /*  Reorder the cipher elements  */

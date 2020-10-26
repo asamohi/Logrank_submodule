@@ -8,7 +8,9 @@
 #include <random>
 using namespace std;
 
-struct Inputs
+void example_logrank_5_clients_test();
+
+struct Inputs3Clients
 {
     double O1;
     double E1;
@@ -33,7 +35,7 @@ struct Crypto_Resources
     CKKSEncoder encoder;
 };
 
-std::__1::shared_ptr<seal::SEALContext> create_context(const int scale_cost_param)
+inline std::__1::shared_ptr<seal::SEALContext> create_context(const int scale_cost_param)
 {
     /* I increased the bit_sizes from (60, 40, 40, 60) to (60, 30, 30, 30, 60) to avoid wrap around bugs
      * on the encrypted data. By the end of the calculation we have 60+30 bits instead of 60 bits.
@@ -63,7 +65,7 @@ std::__1::shared_ptr<seal::SEALContext> create_context(const int scale_cost_para
     return context;
 }
 
-std::__1::shared_ptr<seal::CKKSEncoder> create_encoder(std::__1::shared_ptr<seal::SEALContext> context)
+inline std::__1::shared_ptr<seal::CKKSEncoder> create_encoder(std::__1::shared_ptr<seal::SEALContext> context)
 {
     auto encoder = std::make_shared<CKKSEncoder>(context); // the encoder use poly_modulus_degree/2 slots => 4096
     cout << "Number of slots: " << encoder->slot_count() << endl;
@@ -71,11 +73,11 @@ std::__1::shared_ptr<seal::CKKSEncoder> create_encoder(std::__1::shared_ptr<seal
     return encoder;
 }
 
-Inputs sample_imputs()
+inline Inputs3Clients sample_inputs_3_clients()
 {
     //sample random values.
 
-    Inputs inputs;
+    Inputs3Clients inputs;
     inputs.O1 = rand() % 100;
     inputs.E1 = (double) (rand() % 100000)/1000; //2345.669;
     inputs.V1 = (double) (rand() % 10000)/1000; //422.6;

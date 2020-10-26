@@ -9,9 +9,6 @@
 #include "client.h"
 #include "serv_func.h"
 
-/*  decrypted_result_q - represents an unsecure one-way channel between decryption sever and clients.  */
-extern std::queue<Decrypted_Result> decrypted_result_q;
-
 class creator_server
 {
 private:
@@ -19,15 +16,20 @@ private:
     std::shared_ptr<CKKSEncoder> encoder;
     Decryptor* decryptor;
 
+    /*  decrypted_result_q - represents an unsecure one-way channel between decryption sever and clients.  */
+    std::queue<Decrypted_Result>* decrypted_result_q;
+
     SecretKey secret_key;
     PublicKey public_key;
     RelinKeys relin_keys;
 
 public:
-    creator_server(std::shared_ptr<SEALContext> context_, std::shared_ptr<CKKSEncoder> encoder_)
+    creator_server(std::shared_ptr<SEALContext> context_, std::shared_ptr<CKKSEncoder> encoder_,
+                   std::queue<Decrypted_Result>* decrypted_result_q_)
     {
         context = context_;
         encoder = encoder_;
+        decrypted_result_q = decrypted_result_q_;
 
         /*  Init the keys   */
         create_all_keys();
@@ -90,12 +92,12 @@ public:
         /*  5. The creator server is responsible to empty the decrypted_result_q.
          *      For simplicity, we empty the queue at the just before pushing a new msg.
          *      After cleaning the queue, the server can use it to send the result to the clients */
-        while(!decrypted_result_q.empty())
+        while(!decrypted_result_q->empty())
         {
-            decrypted_result_q.pop();
+            decrypted_result_q->pop();
         }
 
-        decrypted_result_q.push(result);
+        decrypted_result_q->push(result);
     }
 };
 

@@ -1,5 +1,5 @@
 //
-// Created by Anat Samohi on 23/10/2020.
+// Created by Anat Samohi on 26/10/2020.
 //
 
 #include <exception>
@@ -10,17 +10,15 @@
 #include "client.h"
 #include "evaluator_server.h"
 #include "logrank_simulation.h"
-
+#include "real_values_simulation.h"
 using namespace std;
 using namespace seal;
 
-/*---Global Resources---*/
+void Logrank_protocol_5_clients_sim (int test_index) {
 
-void Logrank_protocol_sim () {
-
-    cout << " ------------------------------" << endl;
-    cout << " ---START LOGRANK SIMULATION---" << endl;
-    cout << " ------------------------------" << endl;
+    cout << " -------------------------------" << endl;
+    cout << " ---START 5 CLIENT SIMULATION---" << endl;
+    cout << " -------------------------------" << endl;
 
     /* ------------------------------------------ */
     /* --------------- OFFLINE PHASE -------------*/
@@ -32,8 +30,8 @@ void Logrank_protocol_sim () {
 
     /*  decrypted_result_q - represents an unsecure one-way channel between decryption sever and clients.  */
     std::queue<Decrypted_Result> decrypted_result_q;
-
     /*  The scale sets the resolution of the real number. Each real number is transform to integer when encoded */
+
     const int scale_cost_param = 30;
     double scale = pow(2.0, scale_cost_param);
 
@@ -42,11 +40,14 @@ void Logrank_protocol_sim () {
     std::shared_ptr<CKKSEncoder> encoder = create_encoder(context);
 
     /*  Init values - sample random numbers to be clients' inputs   */
-    Inputs3Clients inputs = sample_inputs_3_clients();
+    Inputs5Clients inputs = take_inputs_from_data(test_index);
 
     /*  Calculate the protocol correct output, for verification only  */
-    double trueResult =
-        (((inputs.O1 + inputs.O2 + inputs.O3) - (inputs.E1 + inputs.E2 + inputs.E3)) / sqrt(inputs.V1 + inputs.V2 + inputs.V3));
+    double sigma_O = (inputs.O1 + inputs.O2 + inputs.O3 + inputs.O4 + inputs.O5);
+    double sigma_E = (inputs.E1 + inputs.E2 + inputs.E3 + inputs.E4 + inputs.E5);
+    double sigma_V = (inputs.V1 + inputs.V2 + inputs.V3 + inputs.V4 + inputs.V5);
+
+    double trueResult = (sigma_O - sigma_E) / sqrt(sigma_V);
     cout << " True value: " << trueResult << endl;
 
     /*  creator_server entity: the creator_server creates the keys and performs the decryption  */
@@ -65,6 +66,8 @@ void Logrank_protocol_sim () {
     client client1(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O1, inputs.E1, inputs.V1, inputs.r1);
     client client2(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O2, inputs.E2, inputs.V2, inputs.r2);
     client client3(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O3, inputs.E3, inputs.V3, inputs.r3);
+    client client4(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O4, inputs.E4, inputs.V4, inputs.r4);
+    client client5(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O5, inputs.E5, inputs.V5, inputs.r5);
 
     /* ------------------------------------------ */
     /* --------------- ONLINE PHASE --------------*/
@@ -74,6 +77,8 @@ void Logrank_protocol_sim () {
     client1.get_encryped_msg();
     client2.get_encryped_msg();
     client3.get_encryped_msg();
+    client4.get_encryped_msg();
+    client5.get_encryped_msg();
 
     /*  2. Evaluation over encrypted data   */
     Encrypted_Result encryptedResult = eval_server.evaluate();
@@ -90,20 +95,17 @@ void Logrank_protocol_sim () {
     cout << "True result : " << trueResult << endl;
     if(std::abs ((double)(calculatedResult - trueResult)/calculatedResult) > 0.001)
     {
-        cout << std::abs((double)(calculatedResult - trueResult)/calculatedResult) << endl;
+        cout << "---- ERROR!! ----- the gap is : " << std::abs((double)(calculatedResult - trueResult)/calculatedResult) << endl;
         throw;
     }
 }
 
-void example_logrank_test()
+void example_logrank_5_clients_test()
 {
-    /*  Run 10 times with random inputs   */
-    for (int i=0; i<50; i++)
+    for (int i=0; i<5; i++)
     {
-        Logrank_protocol_sim();
+        Logrank_protocol_5_clients_sim(i);
     }
-
-    example_logrank_5_clients_test();
 }
 
 
