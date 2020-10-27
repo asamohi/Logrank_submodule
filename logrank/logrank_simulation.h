@@ -96,6 +96,25 @@ inline Inputs3Clients sample_inputs_3_clients()
     return inputs;
 }
 
+inline void verify_result(client& client, double trueResult)
+{
+    /*  Simulation verification  */
+    double calculatedResult = client.get_result();
+    cout << "True result : " << trueResult << endl;
+    if(std::abs ((double)(calculatedResult - trueResult)/calculatedResult) > 0.001)
+    {
+        cout << "---- ERROR!! ----- the gap is : " << std::abs((double)(calculatedResult - trueResult)/calculatedResult) << endl;
+        throw;
+    }
+}
 
+inline void measure_test_time(chrono::high_resolution_clock::time_point time_start)
+{
+    /*  Measure performance of the online phase */
+    chrono::high_resolution_clock::time_point time_end = chrono::high_resolution_clock::now();
+    chrono::milliseconds time_diff = chrono::duration_cast<chrono::milliseconds>(time_end - time_start);
+    cout << "END ONLINE PHASE [" << time_diff.count() << " milliseconds]" << endl;
+
+}
 #endif // SEAL_LOGRANK_SIMULATION_H
 

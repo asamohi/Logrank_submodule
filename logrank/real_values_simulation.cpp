@@ -73,6 +73,9 @@ void Logrank_protocol_5_clients_sim (int test_index) {
     /* --------------- ONLINE PHASE --------------*/
     /* ------------------------------------------ */
 
+    /*  0. setting the timer    */
+    chrono::high_resolution_clock::time_point time_start = chrono::high_resolution_clock::now();
+
     /*  1. The clients encrypts their results and send over secure channel to the evaluator server  */
     client1.get_encryped_msg();
     client2.get_encryped_msg();
@@ -91,13 +94,10 @@ void Logrank_protocol_5_clients_sim (int test_index) {
     client2.print_result();
 
     /*  5. Simulation verification  */
-    double calculatedResult = client3.get_result();
-    cout << "True result : " << trueResult << endl;
-    if(std::abs ((double)(calculatedResult - trueResult)/calculatedResult) > 0.001)
-    {
-        cout << "---- ERROR!! ----- the gap is : " << std::abs((double)(calculatedResult - trueResult)/calculatedResult) << endl;
-        throw;
-    }
+    verify_result(client3, trueResult);
+
+    /*  6. Measure performance of the online phase */
+    measure_test_time(time_start);
 }
 
 void example_logrank_5_clients_test()
