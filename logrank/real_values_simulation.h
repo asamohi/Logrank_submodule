@@ -79,7 +79,7 @@ inline Inputs5Clients take_inputs_from_data(int test_index)
         break;
     }
 
-    inputs.r1 = (double) (rand() % 10000000)/10000; //34.328;
+    inputs.r1 = (double) (rand() % 10000000)/10000;
     inputs.r2 = (double) (rand() % 10000000)/10000;
     inputs.r3 = (double) (rand() % 10000000)/10000;
     inputs.r4 = (double) (rand() % 10000000)/10000;
