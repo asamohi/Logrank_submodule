@@ -8,7 +8,7 @@
 #include <condition_variable>
 #include <exception>
 #include <mutex>
-#include "../../examples.h"
+#include "../../../examples.h"
 #include "serv_func.h"
 
 class Semaphore

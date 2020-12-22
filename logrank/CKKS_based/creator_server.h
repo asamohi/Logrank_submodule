@@ -5,7 +5,7 @@
 #ifndef SEAL_CREATOR_SERVER_H
 #define SEAL_CREATOR_SERVER_H
 
-#include "../../examples.h"
+#include "../../../examples.h"
 #include "client.h"
 #include "serv_func.h"
 

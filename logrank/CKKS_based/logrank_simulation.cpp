@@ -4,12 +4,12 @@
 
 #include <exception>
 #include <queue>
-#include "../../examples.h"
-#include "serv_func.h"
-#include "creator_server.h"
+#include "../../../examples.h"
 #include "client.h"
-#include "evaluator_server.h"
 #include "logrank_simulation.h"
+#include "creator_server.h"
+#include "evaluator_server.h"
+#include "serv_func.h"
 
 using namespace std;
 using namespace seal;
@@ -98,7 +98,7 @@ void Logrank_protocol_sim () {
 void example_logrank_test()
 {
     /*  Run 10 times with random inputs   */
-    for (int i=0; i<5; i++)
+    for (int i=0; i<1; i++)
     {
         Logrank_protocol_sim();
     }

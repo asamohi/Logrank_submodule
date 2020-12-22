@@ -6,7 +6,8 @@
 #define SEAL_CLIENT_H
 
 #include <queue>
-#include "../../examples.h"
+#include <tgmath.h>
+#include "../../../examples.h"
 #include "serv_func.h"
 
 struct Client_Input
@@ -59,15 +60,21 @@ public:
     {
         /*  The client encodes the input    */
         Plaintext plain_O_minus_E, plain_V, plain_r;
-        encoder->encode(input.O - input.E, scale, plain_O_minus_E);
-        encoder->encode(input.V, scale, plain_V);
+        cout << " before coding plain_O_minus_E::save_size: "
+             << plain_O_minus_E.save_size() << endl;
+        encoder->encode(floor((input.O - input.E)*10000), scale, plain_O_minus_E);
+        encoder->encode(floor(input.V*10000), scale, plain_V);
         encoder->encode(input.r, scale, plain_r);
+        cout << " after coding plain_O_minus_E::save_size: "
+             << plain_O_minus_E.save_size() << endl;
 
         /*  The client uses the public key to encrypt the input into a cipher msg   */
         Cipher_Msg cipher;
         encryptor->encrypt(plain_O_minus_E, cipher.enc_O_minus_E);
         encryptor->encrypt(plain_V, cipher.enc_V);
         encryptor->encrypt(plain_r, cipher.enc_r);
+        cout << " after encrypting cipher.enc_O_minus_E::save_size: "
+             << cipher.enc_O_minus_E.save_size() << endl;
 
         /*  The client uses the channel to send the cipher msg to the evaluation server  */
         enc_msg_q->push(cipher);
@@ -78,14 +85,14 @@ public:
         /*  Print the calculated Z */
         Decrypted_Result decryptedResult = decrypted_result_q->front();
         cout << "U=" << decryptedResult.U << " D=" << decryptedResult.D << endl;
-        cout << "The calculated Z is : " << (decryptedResult.D / sqrt(decryptedResult.U)) << endl;
+        cout << "The calculated Z is : " << ((decryptedResult.D / 10000) / sqrt(decryptedResult.U / 10000)) << endl;
     }
 
     double get_result()
     {
         /*  Return the calculated Z */
         Decrypted_Result decryptedResult = decrypted_result_q->front();
-        return(decryptedResult.D / sqrt(decryptedResult.U));
+        return((decryptedResult.D / 10000) / sqrt(decryptedResult.U / 10000));
     }
 };
 

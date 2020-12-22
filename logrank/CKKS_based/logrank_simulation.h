@@ -78,20 +78,20 @@ inline Inputs3Clients sample_inputs_3_clients()
     //sample random values.
 
     Inputs3Clients inputs;
-    inputs.O1 = rand() % 100;
-    inputs.E1 = (double) (rand() % 100000)/1000; //2345.669;
-    inputs.V1 = (double) (rand() % 10000)/1000; //422.6;
-    inputs.r1 = (double) (rand() % 100000000)/10000; //7134.328;
+    inputs.O1 = rand() % 32;
+    inputs.E1 = (double) (rand() % 32000)/1000;
+    inputs.V1 = (double) (rand() % 32000)/1000;
+    inputs.r1 = (double) (rand() % 16);
 
-    inputs.O2 = rand() % 100;
-    inputs.E2 = (double) (rand() % 100000)/1000; //2345.669;
-    inputs.V2 = (double) (rand() % 10000)/1000; //422.6;
-    inputs.r2 = (double) (rand() % 100000000)/10000; //7134.328;
+    inputs.O2 = rand() % 32;
+    inputs.E2 = (double) (rand() % 32000)/1000;
+    inputs.V2 = (double) (rand() % 32000)/1000;
+    inputs.r2 = (double) (rand() % 16);
 
-    inputs.O3 = rand() % 100;
-    inputs.E3 = (double) (rand() % 100000)/1000; //2345.669;
-    inputs.V3 = (double) (rand() % 10000)/1000; //422.6;
-    inputs.r3 = (double) (rand() % 100000000)/10000; //7134.328;
+    inputs.O3 = rand() % 32;
+    inputs.E3 = (double) (rand() % 32000)/1000;
+    inputs.V3 = (double) (rand() % 32000)/1000;
+    inputs.r3 = (double) (rand() % 16);
 
     return inputs;
 }

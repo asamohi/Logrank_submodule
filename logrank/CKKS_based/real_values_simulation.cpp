@@ -4,13 +4,13 @@
 
 #include <exception>
 #include <queue>
-#include "../../examples.h"
-#include "serv_func.h"
-#include "creator_server.h"
+#include "../../../examples.h"
 #include "client.h"
+#include "creator_server.h"
 #include "evaluator_server.h"
-#include "logrank_simulation.h"
 #include "real_values_simulation.h"
+#include "logrank_simulation.h"
+#include "serv_func.h"
 using namespace std;
 using namespace seal;
 

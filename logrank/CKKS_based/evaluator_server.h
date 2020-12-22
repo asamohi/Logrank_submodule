@@ -6,7 +6,7 @@
 #define SEAL_EVALUATOR_SERVER_H
 
 #include <queue>
-#include "../../examples.h"
+#include "../../../examples.h"
 #include "serv_func.h"
 
 class evaluator_server
@@ -84,6 +84,10 @@ public:
              << context->get_context_data(sigma_T1_encrypted.parms_id())->chain_index() << endl;
         cout << "    + Modulus chain index for R_sq_encrypted: "
              << context->get_context_data(R_sq_encrypted.parms_id())->chain_index() << endl;
+        cout << "    + R_sq_encrypted::save_size: "
+             << R_sq_encrypted.save_size() << endl;
+        cout << "    + sigma_T1_encrypted::save_size: "
+             << sigma_T1_encrypted.save_size() << endl;
         cout << endl;
 
         /*  We could simply switch sigma_T1_encrypted to the next parameters in the modulus switching chain.
@@ -94,6 +98,8 @@ public:
         cout << "Normalize scales to 2^30." << endl;
         sigma_T1_encrypted.scale() = scale;
         R_sq_encrypted.scale() = scale;
+        cout << "    + R_sq_encrypted::save_size: "
+             << R_sq_encrypted.save_size() << endl;
 
         /*  " We still have a problem with mismatching encryption parameters. This is easy
             to fix by using traditional modulus switching (no rescaling). CKKS supports

@@ -5,7 +5,7 @@
 #ifndef SEAL_SERV_FUNC_H
 #define SEAL_SERV_FUNC_H
 
-#include "../../examples.h"
+#include "../../../examples.h"
 
 using namespace std;
 using namespace seal;
@@ -127,10 +127,13 @@ inline void general_multiply_relinearize_and_rescale(Evaluator& evaluator, Ciphe
         evaluator.square(first_arg, result);
     }
     cout << "    + size of " << name << " (before relinearization): " << result.size() << endl;
+    cout << "    + result::save_size: "
+         << result.save_size() << endl;
     evaluator.relinearize_inplace(result, relin_keys);
     cout << "    + size of " << name << " (after relinearization): " << result.size() << endl;
     cout << "    + Scale of " << name << " before rescale: " << log2(result.scale()) << " bits" << endl;
-
+    cout << "    + result::save_size: "
+         << result.save_size() << endl;
     /*
     Now rescale; in addition to a modulus switch, the scale is reduced down by
     a factor equal to the prime that was switched away (30-bit prime). Hence, the
@@ -140,6 +143,8 @@ inline void general_multiply_relinearize_and_rescale(Evaluator& evaluator, Ciphe
 
     evaluator.rescale_to_next_inplace(result);
     cout << "    + Scale of "<< name << " after rescale: " << log2(result.scale()) << " bits" << endl;
+    cout << "    + result::save_size: "
+         << result.save_size() << endl;
 
 }
 
