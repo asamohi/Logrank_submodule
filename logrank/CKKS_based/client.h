@@ -76,6 +76,25 @@ public:
         cout << " after encrypting cipher.enc_O_minus_E::save_size: "
              << cipher.enc_O_minus_E.save_size() << endl;
 
+        /* Put the ciphertext objects in exteral files - for future use
+         * The file path: /SEAL/bin/fatut.txt */
+
+        std::ofstream outfile;
+        outfile.open("fatut.txt",std::ofstream::binary);
+        streampos begin,end;
+
+        /* begin - the position of the write ptr in the file before the write */
+        begin = outfile.tellp();
+
+        cipher.enc_O_minus_E.save(outfile); //366,219
+        cipher.enc_V.save(outfile);
+        cipher.enc_r.save(outfile);
+
+        /* end - the position of the write ptr in the file before the write */
+        end = outfile.tellp();
+        cout << "size is: " << (end-begin) << " bytes.\n"; // The size is ~1.1M
+
+
         /*  The client uses the channel to send the cipher msg to the evaluation server  */
         enc_msg_q->push(cipher);
     }
