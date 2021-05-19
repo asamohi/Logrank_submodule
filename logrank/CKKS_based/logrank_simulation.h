@@ -28,6 +28,14 @@ struct Inputs3Clients
     double r3;
 };
 
+struct ClientsInput
+{
+    double O;
+    double E;
+    double V;
+    double r;
+};
+
 struct Crypto_Resources
 {
     double scale;
@@ -73,6 +81,16 @@ inline std::__1::shared_ptr<seal::CKKSEncoder> create_encoder(std::__1::shared_p
     return encoder;
 }
 
+inline void sample_inputs_clients(ClientsInput* inputs, int number_of_clients)
+{
+    for (int i=0; i<number_of_clients; i++)
+    {
+        inputs[i].O = rand() % 4096;
+        inputs[i].E = (double) (rand() % 4096000)/1000;
+        inputs[i].V = (double) (rand() % 4096000)/1000;
+        inputs[i].r = (double) (rand() % 4096);
+    }
+}
 inline Inputs3Clients sample_inputs_3_clients()
 {
     //sample random values.
@@ -96,10 +114,10 @@ inline Inputs3Clients sample_inputs_3_clients()
     return inputs;
 }
 
-inline void verify_result(client& client, double trueResult)
+inline void verify_result(client* client, double trueResult)
 {
     /*  Simulation verification  */
-    double calculatedResult = client.get_result();
+    double calculatedResult = client->get_result();
     cout << "True result : " << trueResult << endl;
     if(std::abs ((double)(calculatedResult - trueResult)/calculatedResult) > 0.001)
     {

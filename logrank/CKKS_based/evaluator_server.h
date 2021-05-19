@@ -39,7 +39,7 @@ public:
         delete evaluator;
     }
 
-    Encrypted_Result evaluate()
+    Encrypted_Result evaluate_with_random()
     {
         /*  Read all the cipher msgs from all clients.
          *  We assume that when this method is called all the clients already put their msgs in the queue  */
@@ -137,6 +137,59 @@ public:
         cout << "    + Exact scale in D_encrypted: " << output.D_encrypted.scale() << endl;
         cout << "    + Exact scale in  U_encrypted: " << output.U_encrypted.scale() << endl;
         cout << endl;
+
+        return output;
+    }
+
+    Encrypted_Result evaluate()
+    {
+        /*  Read all the cipher msgs from all clients.
+         *  We assume that when this method is called all the clients already put their msgs in the queue  */
+        vector<Cipher_Msg> msg_vec;
+        while(!enc_msg_q->empty())
+        {
+            msg_vec.push_back(enc_msg_q->front());
+            enc_msg_q->pop();
+        }
+
+        /*  Reorder the cipher elements  */
+        Basic_Vectors basicVectors = create_basic_vectors(msg_vec);
+
+        Encrypted_Result output;
+
+        /*  Compute T0  */
+        Ciphertext sigma_T0_encrypted;
+        calculate_T0(*evaluator, basicVectors, output.D_encrypted);
+
+        /*  Compute T1  */
+        Ciphertext sigma_T1_encrypted;
+        calculate_T1(*evaluator, basicVectors, output.U_encrypted);
+
+        cout << endl;
+        print_line(__LINE__);
+        cout << "Parameters used by all three terms are different." << endl;
+        cout << "    + Modulus chain index for D_encrypted: "
+             << context->get_context_data(output.D_encrypted.parms_id())->chain_index() << endl;
+        cout << "    + Modulus chain index for U_encrypted: "
+             << context->get_context_data(output.U_encrypted.parms_id())->chain_index() << endl;
+        cout << "    + Exact scale in D_encrypted: " << output.D_encrypted.scale() << endl;
+        cout << "    + Exact scale in  U_encrypted: " << output.U_encrypted.scale() << endl;
+        cout << endl;
+
+        std::ofstream outfile;
+        outfile.open("fatut.txt",std::ofstream::binary);
+        streampos begin,end;
+
+        /* begin - the position of the write ptr in the file before the write */
+        begin = outfile.tellp();
+
+        output.U_encrypted.save(outfile); //366,219
+        output.D_encrypted.save(outfile);
+        //cipher.enc_r.save(outfile);
+
+        /* end - the position of the write ptr in the file before the write */
+        end = outfile.tellp();
+        cout << "encrypted result size is: " << (end-begin) << " bytes.\n"; // The size is ~1.1M
 
         return output;
     }

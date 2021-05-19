@@ -60,21 +60,14 @@ public:
     {
         /*  The client encodes the input    */
         Plaintext plain_O_minus_E, plain_V, plain_r;
-        cout << " before coding plain_O_minus_E::save_size: "
-             << plain_O_minus_E.save_size() << endl;
-        encoder->encode(floor((input.O - input.E)*10000), scale, plain_O_minus_E);
-        encoder->encode(floor(input.V*10000), scale, plain_V);
-        encoder->encode(input.r, scale, plain_r);
-        cout << " after coding plain_O_minus_E::save_size: "
-             << plain_O_minus_E.save_size() << endl;
+        encoder->encode((input.O - input.E), scale, plain_O_minus_E);
+        encoder->encode(input.V, scale, plain_V);
 
         /*  The client uses the public key to encrypt the input into a cipher msg   */
         Cipher_Msg cipher;
         encryptor->encrypt(plain_O_minus_E, cipher.enc_O_minus_E);
         encryptor->encrypt(plain_V, cipher.enc_V);
-        encryptor->encrypt(plain_r, cipher.enc_r);
-        cout << " after encrypting cipher.enc_O_minus_E::save_size: "
-             << cipher.enc_O_minus_E.save_size() << endl;
+        //encryptor->encrypt(plain_r, cipher.enc_r);
 
         /* Put the ciphertext objects in exteral files - for future use
          * The file path: /SEAL/bin/fatut.txt */
@@ -88,11 +81,11 @@ public:
 
         cipher.enc_O_minus_E.save(outfile); //366,219
         cipher.enc_V.save(outfile);
-        cipher.enc_r.save(outfile);
+        //cipher.enc_r.save(outfile);
 
         /* end - the position of the write ptr in the file before the write */
         end = outfile.tellp();
-        cout << "size is: " << (end-begin) << " bytes.\n"; // The size is ~1.1M
+        cout << "ecryoted inputs size is: " << (end-begin) << " bytes.\n"; // The size is ~1.1M
 
 
         /*  The client uses the channel to send the cipher msg to the evaluation server  */
@@ -104,14 +97,14 @@ public:
         /*  Print the calculated Z */
         Decrypted_Result decryptedResult = decrypted_result_q->front();
         cout << "U=" << decryptedResult.U << " D=" << decryptedResult.D << endl;
-        cout << "The calculated Z is : " << ((decryptedResult.D / 10000) / sqrt(decryptedResult.U / 10000)) << endl;
+        cout << "The calculated Z is : " << (decryptedResult.D / sqrt(decryptedResult.U)) << endl;
     }
 
     double get_result()
     {
         /*  Return the calculated Z */
         Decrypted_Result decryptedResult = decrypted_result_q->front();
-        return((decryptedResult.D / 10000) / sqrt(decryptedResult.U / 10000));
+        return(decryptedResult.D / sqrt(decryptedResult.U));
     }
 };
 

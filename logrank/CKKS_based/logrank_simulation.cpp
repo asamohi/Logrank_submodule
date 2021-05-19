@@ -16,7 +16,7 @@ using namespace seal;
 
 /*---Global Resources---*/
 
-void Logrank_protocol_sim () {
+void Logrank_protocol_sim (int num_of_clients) {
 
     cout << " ------------------------------" << endl;
     cout << " ---START LOGRANK SIMULATION---" << endl;
@@ -42,11 +42,19 @@ void Logrank_protocol_sim () {
     std::shared_ptr<CKKSEncoder> encoder = create_encoder(context);
 
     /*  Init values - sample random numbers to be clients' inputs   */
-    Inputs3Clients inputs = sample_inputs_3_clients();
+    ClientsInput inputs[num_of_clients];
+    sample_inputs_clients(inputs, num_of_clients);
 
     /*  Calculate the protocol correct output, for verification only  */
+    double sigma_O = 0, sigma_E = 0, sigma_V = 0;
+    for (int i=0; i<num_of_clients; i++)
+    {
+        sigma_O += inputs[i].O;
+        sigma_E += inputs[i].E;
+        sigma_V += inputs[i].V;
+    }
     double trueResult =
-        (((inputs.O1 + inputs.O2 + inputs.O3) - (inputs.E1 + inputs.E2 + inputs.E3)) / sqrt(inputs.V1 + inputs.V2 + inputs.V3));
+        ((sigma_O - sigma_E) / sqrt(sigma_V));
     cout << " True value: " << trueResult << endl;
 
     /*  creator_server entity: the creator_server creates the keys and performs the decryption  */
@@ -62,9 +70,12 @@ void Logrank_protocol_sim () {
 
     /*  client entities: perform the experiment and wait for the decrypted output.
      *  In this simulation the experiment results are given to the object */
-    client client1(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O1, inputs.E1, inputs.V1, inputs.r1);
-    client client2(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O2, inputs.E2, inputs.V2, inputs.r2);
-    client client3(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale, inputs.O3, inputs.E3, inputs.V3, inputs.r3);
+    client* clients[num_of_clients];
+    for (int i=0; i<num_of_clients; i++)
+    {
+        clients[i] = new client(context, encoder, key_server.get_public_key(), &enc_msg_q, &decrypted_result_q, scale,
+                                         inputs[i].O, inputs[i].E, inputs[i].V, inputs[i].r);
+    }
 
     /* ------------------------------------------ */
     /* --------------- ONLINE PHASE --------------*/
@@ -74,9 +85,10 @@ void Logrank_protocol_sim () {
     chrono::high_resolution_clock::time_point time_start = chrono::high_resolution_clock::now();
 
     /*  1. The clients encrypts their results and send over secure channel to the evaluator server  */
-    client1.get_encryped_msg();
-    client2.get_encryped_msg();
-    client3.get_encryped_msg();
+    for (int i=0; i<num_of_clients; i++)
+    {
+        clients[i]->get_encryped_msg();
+    }
 
     /*  2. Evaluation over encrypted data   */
     Encrypted_Result encryptedResult = eval_server.evaluate();
@@ -85,22 +97,30 @@ void Logrank_protocol_sim () {
     key_server.decrypt_msg(encryptedResult);
 
     /*  4. The clients receive the output   */
-    client1.print_result();
-    client2.print_result();
+    clients[0]->print_result();
 
     /*  5. Simulation verification  */
-    verify_result(client3, trueResult);
+    verify_result(clients[2], trueResult);
 
     /*  6. Measure performance of the online phase */
     measure_test_time(time_start);
+
+    /* delete */
+    for (int i=0; i<num_of_clients; i++)
+    {
+        delete clients[i];
+    }
 }
 
 void example_logrank_test()
 {
+    int num_of_clients = 0;
+    cout << endl << "> type number of cliets: ";
+    cin >> num_of_clients;
     /*  Run 10 times with random inputs   */
     for (int i=0; i<1; i++)
     {
-        Logrank_protocol_sim();
+        Logrank_protocol_sim(num_of_clients);
     }
 
     example_logrank_5_clients_test();

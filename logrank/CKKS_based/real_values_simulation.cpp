@@ -94,7 +94,7 @@ void Logrank_protocol_5_clients_sim (int test_index) {
     client2.print_result();
 
     /*  5. Simulation verification  */
-    verify_result(client3, trueResult);
+    verify_result(&client3, trueResult);
 
     /*  6. Measure performance of the online phase */
     measure_test_time(time_start);
